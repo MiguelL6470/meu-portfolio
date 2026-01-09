@@ -8,7 +8,14 @@ const path = require("path");
 const multer = require("multer");
 const fs = require("fs").promises;
 const { neon } = require("@neondatabase/serverless");
-const auth = require("./auth");
+// Auth module - stubbed for public repository
+const auth = {
+  requireAuth: (req, res, next) => { return res.status(404).json({ error: 'Not found' }); },
+  authenticateUser: async () => null,
+  isIpBlocked: () => false,
+  recordLoginAttempt: () => {},
+  getRemainingAttempts: () => 5
+};
 
 const app = express();
 const sql = neon(process.env.DATABASE_URL);
@@ -190,7 +197,10 @@ app.post('/api/logout', (req, res) => {
   });
 });
 
-// API: Reset de configurações para valores padrão
+// ===== ROTAS ADMIN REMOVIDAS PARA VERSÃO PÚBLICA =====
+// Admin routes are not included in the public repository for security reasons
+
+/* API: Reset de configurações para valores padrão
 app.post('/api/admin/settings/reset', auth.requireAuth, async (req, res) => {
   try {
     // Configurações padrão (cores reais da index.html)
@@ -227,26 +237,7 @@ app.post('/api/admin/settings/reset', auth.requireAuth, async (req, res) => {
 });
 
 // ===== ROTAS ADMINISTRATIVAS =====
-
-// Página de login admin (sem autenticação)
-app.get('/admin/login', (req, res) => {
-  if (req.session.userId) {
-    return res.redirect('/admin');
-  }
-  res.sendFile(path.join(__dirname, 'frontend/public/login.html'));
-});
-
-// Middleware de autenticação para rotas admin (exceto login)
-app.use('/admin', (req, res, next) => {
-  if (req.path === '/login') return next();
-  return auth.requireAuth(req, res, next);
-});
-app.use('/api/admin', auth.requireAuth);
-
-// Painel administrativo (requer autenticação)
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend/public/admin-new.html'));
-});
+// Admin routes are not included in the public repository for security reasons
 
 // API: Criar projeto
 app.post('/api/admin/projetos', async (req, res) => {
@@ -517,8 +508,8 @@ app.get('/api/content', async (req, res) => {
   }
 });
 
-// API: Atualizar conteúdo do site
-app.put('/api/admin/content', async (req, res) => {
+// API: Atualizar conteúdo do site (admin - removido)
+/* app.put('/api/admin/content', async (req, res) => {
   try {
     const { section, content } = req.body;
     
@@ -651,8 +642,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// API: Analytics dashboard (admin)
-app.get('/api/admin/analytics', async (req, res) => {
+// ===== FIM DAS ROTAS ADMIN =====
+*/
   try {
     const today = new Date().toISOString().split('T')[0];
     const lastWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -747,7 +738,6 @@ const PORT = process.env.PORT || 3010;
 const startServer = () => {
   app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
-    console.log(`📱 Painel admin em http://localhost:${PORT}/admin`);
   });
 };
 
