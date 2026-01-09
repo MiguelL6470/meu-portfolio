@@ -725,6 +725,7 @@ app.get('/api/admin/analytics', async (req, res) => {
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
+*/
 
 // Middleware de tratamento de erros
 app.use((err, req, res, next) => {
