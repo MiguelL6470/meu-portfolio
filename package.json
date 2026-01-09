@@ -7,7 +7,9 @@
     "start": "node run.js",
     "dev": "node run.js --dev",
     "init-db": "node scripts/init-db.js",
-    "test": "node app.js"
+    "test": "node app.js",
+    "build": "node -c api/index.js && node -c app.js && node -c run.js && echo '✓ Build validation passed'",
+    "vercel-build": "echo 'Build completed'"
   },
   "keywords": [
     "portfolio",
