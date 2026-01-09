@@ -29,6 +29,10 @@ const app = express();
 // Log inicial para debug
 console.log('🚀 Inicializando handler do Vercel...');
 console.log('NODE_ENV:', process.env.NODE_ENV || 'não definido');
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? '✅ Configurada' : '❌ Não configurada');
+console.log('SESSION_SECRET:', process.env.SESSION_SECRET ? '✅ Configurada' : '⚠️ Usando padrão inseguro');
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? '✅ Configurada' : '❌ Não configurada');
+console.log('SESSION_SECRET:', process.env.SESSION_SECRET ? '✅ Configurada' : '⚠️ Usando padrão inseguro');
 
 // Configurar banco de dados com tratamento de erro
 let sql;
@@ -361,8 +365,22 @@ app.use((req, res, next) => {
 
 // Middleware de tratamento de erros
 app.use((err, req, res, next) => {
-  console.error('Erro no servidor:', err);
-  res.status(500).json({ error: 'Algo deu errado!' });
+  console.error('❌ Erro no servidor:', err.message || err);
+  console.error('Stack:', err.stack);
+  res.status(500).json({ 
+    error: 'Erro interno do servidor',
+    message: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+// Capturar erros não tratados
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  console.error('Stack:', error.stack);
 });
 
 // Rota catch-all - servir index.html para SPA routing
