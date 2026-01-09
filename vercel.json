@@ -1,6 +1,4 @@
 {
-  "version": 2,
-  "public": false,
   "rewrites": [
     {
       "source": "/api/:path*",
@@ -15,13 +13,6 @@
       "destination": "/api/index.js"
     }
   ],
-  "functions": {
-    "api/index.js": {
-      "runtime": "@vercel/node",
-      "maxDuration": 30,
-      "memory": 1024
-    }
-  },
   "headers": [
     {
       "source": "/assets/(.*)",
