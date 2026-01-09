@@ -1,36 +1,38 @@
 // Vercel Serverless Function Handler
-// Carregar variáveis de ambiente
+// Wrapper global para capturar qualquer erro durante a inicialização
+let app;
+
 try {
-  require("dotenv").config();
-} catch (error) {
-  console.warn('Aviso: dotenv não carregado (normal no Vercel)');
-}
+  // Carregar variáveis de ambiente
+  try {
+    require("dotenv").config();
+  } catch (error) {
+    console.warn('Aviso: dotenv não carregado (normal no Vercel)');
+  }
 
-const express = require("express");
-const cors = require("cors");
-const helmet = require("helmet");
-const session = require("express-session");
-const path = require("path");
-const multer = require("multer");
-const fs = require("fs").promises;
-const { neon } = require("@neondatabase/serverless");
+  const express = require("express");
+  const cors = require("cors");
+  const helmet = require("helmet");
+  const session = require("express-session");
+  const path = require("path");
+  const multer = require("multer");
+  const fs = require("fs").promises;
+  const { neon } = require("@neondatabase/serverless");
 
-// Auth module - stubbed for public repository
-const auth = {
-  requireAuth: (req, res, next) => { return res.status(404).json({ error: 'Not found' }); },
-  authenticateUser: async () => null,
-  isIpBlocked: () => false,
-  recordLoginAttempt: () => {},
-  getRemainingAttempts: () => 5
-};
+  // Auth module - stubbed for public repository
+  const auth = {
+    requireAuth: (req, res, next) => { return res.status(404).json({ error: 'Not found' }); },
+    authenticateUser: async () => null,
+    isIpBlocked: () => false,
+    recordLoginAttempt: () => {},
+    getRemainingAttempts: () => 5
+  };
 
-const app = express();
+  app = express();
 
 // Log inicial para debug
 console.log('🚀 Inicializando handler do Vercel...');
 console.log('NODE_ENV:', process.env.NODE_ENV || 'não definido');
-console.log('DATABASE_URL:', process.env.DATABASE_URL ? '✅ Configurada' : '❌ Não configurada');
-console.log('SESSION_SECRET:', process.env.SESSION_SECRET ? '✅ Configurada' : '⚠️ Usando padrão inseguro');
 console.log('DATABASE_URL:', process.env.DATABASE_URL ? '✅ Configurada' : '❌ Não configurada');
 console.log('SESSION_SECRET:', process.env.SESSION_SECRET ? '✅ Configurada' : '⚠️ Usando padrão inseguro');
 
@@ -410,6 +412,53 @@ app.use('*', (req, res) => {
   }
 });
 
+  // App inicializado com sucesso
+  console.log('✅ App inicializado com sucesso');
+} catch (initError) {
+  console.error('❌ ERRO CRÍTICO na inicialização:', initError.message);
+  console.error('Stack:', initError.stack);
+  
+  // Criar um app mínimo de fallback
+  try {
+    const expressFallback = require("express");
+    app = expressFallback();
+    
+    app.use((req, res) => {
+      console.error('Handler de fallback acionado para:', req.path);
+      res.status(500).json({ 
+        error: 'Erro na inicialização do servidor',
+        message: 'Por favor, verifique os logs do servidor',
+        path: req.path
+      });
+    });
+  } catch (fallbackError) {
+    console.error('❌ Erro ao criar fallback:', fallbackError);
+    // Criar handler mínimo sem Express
+    app = (req, res) => {
+      res.status(500).json({ error: 'Erro crítico na inicialização' });
+    };
+  }
+}
+
+// Handler wrapper para capturar erros em runtime
+const handler = (req, res) => {
+  try {
+    if (!app) {
+      return res.status(500).json({ error: 'Servidor não inicializado' });
+    }
+    return app(req, res);
+  } catch (error) {
+    console.error('❌ Erro no handler:', error.message);
+    console.error('Stack:', error.stack);
+    if (!res.headersSent) {
+      res.status(500).json({ 
+        error: 'Erro ao processar requisição',
+        message: error.message
+      });
+    }
+  }
+};
+
 // Exportar como handler do Vercel
-module.exports = app;
+module.exports = handler;
 
