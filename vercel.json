@@ -1,6 +1,4 @@
 {
-  "buildCommand": "echo 'No build needed'",
-  "outputDirectory": "frontend/public",
   "functions": {
     "api/index.js": {
       "memory": 1024,
