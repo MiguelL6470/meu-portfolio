@@ -1,4 +1,12 @@
 {
+  "buildCommand": "echo 'No build needed'",
+  "outputDirectory": "frontend/public",
+  "functions": {
+    "api/index.js": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
     {
       "source": "/api/:path*",

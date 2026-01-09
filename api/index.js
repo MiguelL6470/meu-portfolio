@@ -105,7 +105,10 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Configuração de sessão com store em memória (adequado para serverless)
+// Configuração de sessão - desabilitada para serverless (não precisa de sessões no portfólio público)
+// Se precisar de sessões no futuro, use um store externo como Redis
+// Por enquanto, comentamos para evitar warnings e economizar memória
+/*
 app.use(session({
   secret: process.env.SESSION_SECRET || 'portfolio-secret-key-change-in-production',
   resave: false,
@@ -116,15 +119,19 @@ app.use(session({
     maxAge: 24 * 60 * 60 * 1000 // 24 horas
   }
 }));
+*/
 
 // Configurar uploads (usar /tmp no Vercel)
 const uploadDir = process.env.VERCEL ? '/tmp/uploads' : path.join(__dirname, '../uploads');
 
+// Helper para verificar se diretório existe (fs.promises não tem existsSync)
+const fsSync = require('fs');
+
 // Garantir que o diretório existe
 if (!process.env.VERCEL) {
   try {
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    if (!fsSync.existsSync(uploadDir)) {
+      fsSync.mkdirSync(uploadDir, { recursive: true });
     }
   } catch (error) {
     console.warn('Aviso: Não foi possível criar diretório de uploads:', error.message);
@@ -134,7 +141,7 @@ if (!process.env.VERCEL) {
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
     try {
-      if (!process.env.VERCEL && !fs.existsSync(uploadDir)) {
+      if (!process.env.VERCEL && !fsSync.existsSync(uploadDir)) {
         await fs.mkdir(uploadDir, { recursive: true });
       }
       cb(null, uploadDir);
@@ -169,7 +176,6 @@ const upload = multer({
 // Helper para verificar se arquivo existe
 function fileExists(filePath) {
   try {
-    const fsSync = require('fs');
     return fsSync.existsSync(filePath);
   } catch {
     return false;
@@ -460,5 +466,6 @@ const handler = (req, res) => {
 };
 
 // Exportar como handler do Vercel
+// IMPORTANTE: Deve ser uma função que aceita (req, res) diretamente
 module.exports = handler;
 

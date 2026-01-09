@@ -7,4 +7,9 @@ uploads
 .DS_Store
 .vscode
 .idea
+app.js
+run.js
+scripts/
+auth.js
+backend/
 
