@@ -1,0 +1,64 @@
+# Dependências
+node_modules/
+package-lock.json
+
+# Variáveis de ambiente e dados sensíveis
+.env
+.env.local
+.env.*.local
+*.env
+
+# Arquivos de configuração sensíveis
+config.json
+secrets.json
+
+# Uploads e arquivos de usuário
+uploads/
+*.log
+logs/
+
+# Banco de dados local
+*.db
+*.sqlite
+*.sqlite3
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Build e cache
+dist/
+build/
+.cache/
+.parcel-cache/
+
+# Testes
+coverage/
+.nyc_output/
+
+# Temporários
+tmp/
+temp/
+*.tmp
+
+# Documentação interna (se houver dados sensíveis)
+CLAUDE.md
+NOTES.md
+
+# Arquivos do painel administrativo (não devem ser públicos)
+frontend/public/admin*.html
+frontend/public/login.html
+frontend/assets/css/admin*.css
+frontend/assets/css/login.css
+frontend/assets/js/admin*.js
+auth.js
+
