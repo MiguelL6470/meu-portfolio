@@ -644,6 +644,10 @@ app.use((req, res, next) => {
 
 // ===== FIM DAS ROTAS ADMIN =====
 */
+
+// API Analytics removida da versão pública - código comentado por segurança
+/*
+app.get('/api/admin/analytics', async (req, res) => {
   try {
     const today = new Date().toISOString().split('T')[0];
     const lastWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
