@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Meu Portfólio | Desenvolvedor</title>
     <meta name="description" content="Portfólio profissional - Desenvolvedor fullstack disponível para freelances e contratos">
     <meta name="theme-color" content="#667eea">
@@ -98,6 +98,12 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 16px;
+    }
 }
 
 /* Typography */
@@ -303,14 +309,89 @@ h1, h2, h3, h4, h5, h6 {
     display: none;
     flex-direction: column;
     cursor: pointer;
-    gap: 4px;
+    gap: 5px;
+    padding: 8px;
+    z-index: 1001;
+    position: relative;
 }
 
 .hamburger span {
-    width: 25px;
+    width: 28px;
     height: 3px;
     background: var(--text-primary);
     transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+.hamburger.active span:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+/* Mobile Menu Styles */
+@media (max-width: 768px) {
+    .nav-menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 280px;
+        height: 100vh;
+        background: var(--bg-primary);
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        padding: 5rem 2rem 2rem;
+        gap: 0;
+        box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+        transition: right 0.3s ease;
+        z-index: 1000;
+        overflow-y: auto;
+    }
+    
+    .nav-menu.active {
+        right: 0;
+    }
+    
+    .nav-menu li {
+        width: 100%;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .nav-menu li:last-child {
+        border-bottom: none;
+    }
+    
+    /* Fechar menu ao clicar em um link */
+    .nav-menu.active .nav-link {
+        transition: background-color 0.2s ease;
+    }
+    
+    .nav-menu.active .nav-link:active {
+        background-color: var(--bg-secondary);
+    }
+    
+    .nav-link {
+        display: block;
+        padding: 1.25rem 0;
+        font-size: 1.1rem;
+        width: 100%;
+    }
+    
+    .nav-link::after {
+        display: none;
+    }
+    
+    .hamburger {
+        display: flex;
+    }
+    
 }
 
 /* Hero Section */
@@ -463,6 +544,15 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes particleFloat {
     0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
     50% { transform: translateY(-20px) rotate(180deg) scale(1.1); }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes fadeInDown {
@@ -2099,39 +2189,147 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .nav-menu {
-        display: none;
+    /* Navegação */
+    .navbar {
+        padding: 0.875rem 0;
     }
     
-    .hamburger {
-        display: flex;
+    .nav-brand h2 {
+        font-size: 1.35rem;
+    }
+    
+    /* Hero Section */
+    .hero {
+        padding-top: 70px;
+        min-height: 90vh;
     }
     
     .hero .container {
         grid-template-columns: 1fr;
         text-align: center;
+        gap: 2rem;
     }
     
     .hero-title {
-        font-size: 2.5rem;
+        font-size: 2.25rem;
+        line-height: 1.2;
+        margin-bottom: 1.25rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .hero-badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.875rem;
+        margin-bottom: 1.25rem;
     }
     
     .hero-stats {
-        gap: 1rem;
+        gap: 1.25rem;
         flex-wrap: wrap;
         justify-content: center;
+        margin: 1.5rem 0;
     }
     
     .stat-number {
+        font-size: 1.75rem;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.875rem;
+    }
+    
+    .hero-buttons .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 1rem 1.5rem;
+    }
+    
+    .profile-circle {
+        width: 220px;
+        height: 220px;
+        margin: 0 auto;
+    }
+    
+    .profile-circle i {
+        font-size: 3.5rem;
+    }
+    
+    /* Sections */
+    .section-title {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .about {
+        padding: 3.5rem 0;
+    }
+    
+    .about-text p {
+        font-size: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    /* Tech Stack */
+    .tech-stack {
+        margin-top: 2rem;
+    }
+    
+    .tech-stack h3 {
         font-size: 1.5rem;
     }
     
-    .section-title {
-        font-size: 2rem;
+    .tech-categories {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+    
+    .tech-category {
+        padding: 1.25rem;
+    }
+    
+    /* Projects */
+    .projects {
+        padding: 3.5rem 0;
+    }
+    
+    .projects-search-wrapper {
+        margin-bottom: 1.5rem;
+    }
+    
+    .project-search-container {
+        max-width: 100%;
+    }
+    
+    .project-search-input {
+        font-size: 1rem;
+        padding: 0.875rem 0.875rem 0.875rem 3rem;
+    }
+    
+    .project-filters {
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+        padding: 0 0.5rem;
+    }
+    
+    .filter-btn {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.85rem;
+        min-height: 40px;
     }
     
     .projects-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem;
     }
     
     .projects-grid.single-project,
@@ -2139,93 +2337,467 @@ h1, h2, h3, h4, h5, h6 {
         grid-template-columns: 1fr !important;
     }
     
-    .project-search-container {
-        max-width: 100%;
+    .project-card {
+        margin-bottom: 0;
+    }
+    
+    .project-content {
+        padding: 1.25rem;
+    }
+    
+    .project-title {
+        font-size: 1.3rem;
+    }
+    
+    .project-description {
+        font-size: 0.95rem;
+    }
+    
+    /* Contact Section */
+    .contact-section {
+        padding: 3.5rem 0;
+    }
+    
+    .contact-header {
+        margin-bottom: 2.5rem;
+    }
+    
+    .contact-subtitle {
+        font-size: 1.35rem;
+        margin-top: 1rem;
+        padding-top: 0.75rem;
+    }
+    
+    .contact-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .landing-page-promo {
+        margin-top: 2.5rem;
+        padding: 2rem 1.25rem;
+    }
+    
+    .landing-promo-content h3 {
+        font-size: 1.6rem;
+    }
+    
+    .landing-promo-content > p {
+        font-size: 1rem;
     }
     
     .landing-promo-features {
         flex-direction: column;
         align-items: flex-start;
-        gap: 1rem;
+        gap: 0.875rem;
+        margin-bottom: 2rem;
+    }
+    
+    .landing-feature {
+        font-size: 0.95rem;
     }
     
     .landing-promo-actions {
         flex-direction: column;
         width: 100%;
+        gap: 1rem;
     }
     
     .landing-link-btn,
     .landing-whatsapp-btn {
         width: 100%;
         justify-content: center;
+        padding: 1rem 1.5rem;
     }
     
-    .contact-content {
+    .contact-cards-compact {
         grid-template-columns: 1fr;
+        gap: 1.25rem;
+        margin-top: 2rem;
     }
     
-    .footer-content {
-        flex-direction: column;
-        gap: 1rem;
+    .contact-info-card-compact,
+    .whatsapp-card-compact {
+        padding: 1.25rem;
+    }
+    
+    .contact-method-compact {
+        padding: 1rem;
+    }
+    
+    /* Footer */
+    .footer-main {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 3rem 0 1.5rem;
+    }
+    
+    .footer-brand {
         text-align: center;
     }
     
-    .hero-buttons {
-        justify-content: center;
+    .footer-links {
+        grid-template-columns: 1fr;
+        gap: 2rem;
     }
     
-    [data-theme="dark"] .hamburger {
-        color: var(--text-primary);
+    .footer-column {
+        text-align: center;
     }
     
-    .profile-circle {
-        width: 250px;
-        height: 250px;
+    .footer-bottom {
+        flex-direction: column;
+        gap: 1.5rem;
+        padding: 1.5rem 0;
+        text-align: center;
     }
     
-    .profile-circle i {
-        font-size: 4rem;
+    .footer-copyright p {
+        font-size: 0.8rem;
+    }
+    
+    /* Footer waves mobile */
+    .footer-waves {
+        top: -80px;
+        height: 80px;
     }
 }
 
 @media (max-width: 480px) {
+    /* Container e espaçamento geral */
     .container {
-        padding: 0 15px;
+        padding: 0 16px;
     }
     
-    .hero-title {
-        font-size: 2rem;
+    /* Navegação */
+    .navbar {
+        padding: 0.75rem 0;
     }
     
-    .hero-stats {
-        gap: 0.75rem;
-        margin: 1.5rem 0;
-    }
-    
-    .stat-number {
+    .nav-brand h2 {
         font-size: 1.25rem;
     }
     
-    .stat-label {
-        font-size: 0.75rem;
+    .nav-menu {
+        width: 100%;
+        right: -100%;
+    }
+    
+    /* Hero Section - Mobile pequeno */
+    .hero {
+        padding-top: 60px;
+        min-height: 85vh;
+    }
+    
+    .hero-title {
+        font-size: 1.875rem;
+        line-height: 1.2;
+        margin-bottom: 1rem;
     }
     
     .hero-subtitle {
         font-size: 1rem;
+        margin-bottom: 1.25rem;
+        line-height: 1.5;
+    }
+    
+    .hero-badge {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .hero-stats {
+        gap: 1rem;
+        margin: 1.25rem 0;
+        justify-content: space-around;
+        width: 100%;
+    }
+    
+    .stat-item {
+        flex: 1;
+        min-width: 80px;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.7rem;
+    }
+    
+    .hero-buttons {
+        gap: 0.75rem;
     }
     
     .btn {
-        padding: 10px 20px;
-        font-size: 0.875rem;
+        padding: 0.875rem 1.25rem;
+        font-size: 0.9rem;
+        min-height: 44px; /* Touch target mínimo */
     }
     
     .profile-circle {
-        width: 200px;
-        height: 200px;
+        width: 180px;
+        height: 180px;
     }
     
     .profile-circle i {
         font-size: 3rem;
+    }
+    
+    /* Sections */
+    .section-title {
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .about {
+        padding: 3rem 0;
+    }
+    
+    .about-text p {
+        font-size: 0.95rem;
+        line-height: 1.7;
+    }
+    
+    .projects {
+        padding: 3rem 0;
+    }
+    
+    .contact-section {
+        padding: 3rem 0;
+    }
+    
+    /* Tech Stack Mobile */
+    .tech-stack h3 {
+        font-size: 1.35rem;
+    }
+    
+    .tech-category {
+        padding: 1rem;
+    }
+    
+    .category-header h4 {
+        font-size: 1rem;
+    }
+    
+    .tech-item {
+        padding: 0.625rem;
+    }
+    
+    .tech-item span {
+        font-size: 0.9rem;
+    }
+    
+    /* Projects Mobile */
+    .project-search-input {
+        font-size: 0.95rem;
+        padding: 0.75rem 0.75rem 0.75rem 2.75rem;
+        min-height: 44px; /* Touch target */
+    }
+    
+    .search-clear-btn {
+        padding: 0.5rem;
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    .filter-btn {
+        padding: 0.625rem 1rem;
+        font-size: 0.8rem;
+        min-height: 40px;
+    }
+    
+    .project-card {
+        border-radius: 10px;
+    }
+    
+    .project-image {
+        height: 180px;
+    }
+    
+    .project-content {
+        padding: 1rem;
+    }
+    
+    .project-title {
+        font-size: 1.2rem;
+        margin-bottom: 0.625rem;
+    }
+    
+    .project-description {
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+    
+    .project-tech-tag {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.6rem;
+    }
+    
+    .project-link {
+        padding: 0.625rem 1rem;
+        font-size: 0.85rem;
+        min-height: 40px;
+    }
+    
+    /* Contact Mobile */
+    .contact-header {
+        margin-bottom: 2rem;
+    }
+    
+    .contact-subtitle {
+        font-size: 1.15rem;
+        margin-top: 0.75rem;
+        padding-top: 0.5rem;
+    }
+    
+    .landing-page-promo {
+        padding: 1.75rem 1rem;
+        margin-top: 2rem;
+    }
+    
+    .landing-promo-icon {
+        width: 70px;
+        height: 70px;
+        margin-bottom: 1.25rem;
+    }
+    
+    .landing-promo-icon i {
+        font-size: 2.25rem;
+    }
+    
+    .landing-promo-content h3 {
+        font-size: 1.4rem;
+        margin-bottom: 0.875rem;
+    }
+    
+    .landing-promo-content > p {
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .landing-feature {
+        font-size: 0.9rem;
+    }
+    
+    .landing-feature i {
+        font-size: 1.1rem;
+    }
+    
+    .contact-cards-compact {
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .contact-info-card-compact,
+    .whatsapp-card-compact {
+        padding: 1rem;
+    }
+    
+    .contact-method-compact {
+        padding: 0.875rem;
+        gap: 0.75rem;
+    }
+    
+    .method-icon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+    }
+    
+    .method-icon i {
+        font-size: 1.15rem;
+    }
+    
+    .method-content-compact h4 {
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .method-content-compact .method-link {
+        font-size: 0.85rem;
+        word-break: break-word;
+    }
+    
+    .whatsapp-content-compact {
+        gap: 0.875rem;
+    }
+    
+    .whatsapp-icon-small {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .whatsapp-icon-small i {
+        font-size: 1.4rem;
+    }
+    
+    .whatsapp-text-compact h3 {
+        font-size: 1.05rem;
+    }
+    
+    .whatsapp-text-compact p {
+        font-size: 0.85rem;
+    }
+    
+    .whatsapp-btn-compact {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.9rem;
+        min-height: 48px; /* Touch target maior para WhatsApp */
+    }
+    
+    /* Footer Mobile */
+    .footer-main {
+        padding: 2.5rem 0 1.25rem;
+    }
+    
+    .footer-bottom {
+        padding: 1.25rem 0;
+    }
+    
+    .footer-copyright p {
+        font-size: 0.75rem;
+        line-height: 1.5;
+    }
+    
+    .footer-tech {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: center;
+    }
+    
+    .footer-tech span {
+        font-size: 0.75rem;
+    }
+    
+    .tech-badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.6rem;
+    }
+    
+    /* Footer waves mobile pequeno */
+    .footer-waves {
+        top: -60px;
+        height: 60px;
+    }
+    
+    /* Botões flutuantes */
+    .theme-toggle {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+    
+    .scroll-top {
+        bottom: 80px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        font-size: 1rem;
     }
 }
 
@@ -2375,31 +2947,189 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--gradient-primary);
 }
 
-/* Enhanced Mobile Dark Mode */
-@media (max-width: 768px) {
-    .theme-toggle {
-        bottom: 20px;
-        right: 20px;
-        width: 50px;
-        height: 50px;
-        font-size: 1.2rem;
+/* Melhorias adicionais para tablets */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .projects-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
     }
     
-    .scroll-top {
-        bottom: 80px;
-        right: 20px;
-        width: 45px;
-        height: 45px;
+    .projects-grid.single-project {
+        grid-template-columns: minmax(350px, 500px) !important;
+    }
+    
+    .projects-grid.double-project {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    .contact-cards-compact {
+        grid-template-columns: 1.5fr 1fr;
+    }
+}
+
+/* Melhorias para telas muito pequenas */
+@media (max-width: 360px) {
+    .container {
+        padding: 0 12px;
+    }
+    
+    .hero-title {
+        font-size: 1.65rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.95rem;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+    }
+    
+    .profile-circle {
+        width: 160px;
+        height: 160px;
+    }
+    
+    .profile-circle i {
+        font-size: 2.5rem;
+    }
+    
+    .hero-stats {
+        gap: 0.5rem;
+    }
+    
+    .stat-number {
+        font-size: 1.35rem;
+    }
+    
+    .nav-menu {
+        width: 100%;
+        padding: 4rem 1.5rem 2rem;
+    }
+    
+    .project-card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Melhorias de touch e interação */
+@media (hover: none) and (pointer: coarse) {
+    /* Dispositivos touch */
+    .btn,
+    .filter-btn,
+    .project-link,
+    .whatsapp-btn,
+    .whatsapp-btn-compact,
+    .landing-link-btn,
+    .landing-whatsapp-btn {
+        min-height: 44px;
+        -webkit-tap-highlight-color: rgba(102, 126, 234, 0.2);
+    }
+    
+    .nav-link {
+        padding: 1rem 0;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .project-card {
+        -webkit-tap-highlight-color: rgba(102, 126, 234, 0.1);
+    }
+    
+    .method-link {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Melhorar feedback visual em touch */
+    .btn:active,
+    .filter-btn:active,
+    .project-link:active {
+        transform: scale(0.98);
+    }
+}
+
+/* Orientação landscape no mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .hero {
+        min-height: 100vh;
+        padding-top: 50px;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
         font-size: 1rem;
     }
     
-    .project-filters {
-        padding: 0 1rem;
+    .profile-circle {
+        width: 150px;
+        height: 150px;
     }
     
-    .filter-btn {
-        padding: 0.5rem 1rem;
-        font-size: 0.8rem;
+    .section-title {
+        font-size: 1.85rem;
+    }
+}
+
+/* Melhorias de performance e scroll para mobile */
+@media (max-width: 768px) {
+    /* Smooth scrolling otimizado */
+    html {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+    
+    /* Melhorar renderização de imagens */
+    .project-image img {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+    
+    /* Prevenir zoom em inputs no iOS (tamanho mínimo 16px) */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="search"],
+    textarea,
+    select {
+        font-size: 16px !important;
+    }
+    
+    /* Melhorar área de toque em elementos pequenos */
+    .search-clear-btn,
+    .hamburger {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    /* Melhorar área de scroll do menu */
+    .nav-menu {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Overlay para fechar menu ao clicar fora - Mobile */
+@media (max-width: 768px) {
+    body.menu-open::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 999;
+        animation: fadeIn 0.3s ease;
+        backdrop-filter: blur(2px);
+    }
+    
+    /* Prevenir scroll quando menu está aberto */
+    body.menu-open {
+        overflow: hidden;
     }
 }
 
@@ -2409,110 +3139,6 @@ h1, h2, h3, h4, h5, h6 {
         grid-template-columns: 1fr;
         gap: 3rem;
         max-width: 800px;
-    }
-}
-
-@media (max-width: 768px) {
-    .contact-section {
-        padding: 4rem 0;
-    }
-    
-    .contact-header {
-        margin-bottom: 3rem;
-    }
-    
-    .contact-subtitle {
-        font-size: 1.5rem;
-        margin-top: 1rem;
-        padding-top: 0.75rem;
-    }
-    
-    .contact-cards-compact {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-    
-    .contact-info-card-compact,
-    .whatsapp-card-compact {
-        padding: 1.25rem;
-    }
-    
-    .contact-method-compact {
-        padding: 0.875rem;
-    }
-    
-    .method-content-compact h4 {
-        font-size: 0.9rem;
-    }
-    
-    .method-content-compact .method-link {
-        font-size: 0.85rem;
-    }
-    
-    .whatsapp-text-compact h3 {
-        font-size: 1.1rem;
-    }
-    
-    .whatsapp-text-compact p {
-        font-size: 0.85rem;
-    }
-    
-    .whatsapp-icon-small {
-        width: 50px;
-        height: 50px;
-    }
-    
-    .whatsapp-icon-small i {
-        font-size: 1.5rem;
-    }
-    
-    .contact-icon {
-        width: 60px;
-        height: 60px;
-    }
-    
-    .contact-icon i {
-        font-size: 2rem;
-    }
-    
-    .contact-card-header h3 {
-        font-size: 1.5rem;
-    }
-    
-    .contact-methods {
-        gap: 1.5rem;
-    }
-    
-    .contact-method {
-        padding: 1.25rem;
-    }
-    
-    .method-icon {
-        width: 40px;
-        height: 40px;
-    }
-    
-    .method-icon i {
-        font-size: 1.25rem;
-    }
-    
-    .contact-stats {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
-    }
-    
-    .stat-number {
-        font-size: 1.5rem;
-    }
-    
-    .form-row {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    .contact-submit-btn {
-        padding: 1rem 1.5rem;
-        font-size: 1rem;
     }
 }
 
@@ -3103,4 +3729,5 @@ h1, h2, h3, h4, h5, h6 {
         // Service worker removed - not needed for current implementation
     </script>
 </body>
+</html>
 </html>

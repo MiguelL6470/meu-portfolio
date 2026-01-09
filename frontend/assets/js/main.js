@@ -46,8 +46,14 @@ class PortfolioApp {
         if (hamburger && navMenu) {
             hamburger.addEventListener('click', (e) => {
                 e.stopPropagation();
-                hamburger.classList.toggle('active');
+                const isActive = hamburger.classList.toggle('active');
                 navMenu.classList.toggle('active');
+                // Adicionar/remover classe no body para overlay
+                if (isActive) {
+                    document.body.classList.add('menu-open');
+                } else {
+                    document.body.classList.remove('menu-open');
+                }
                 document.body.classList.toggle('menu-open');
             });
         }
@@ -72,6 +78,7 @@ class PortfolioApp {
                 // Close mobile menu
                 hamburger?.classList.remove('active');
                 navMenu?.classList.remove('active');
+                document.body.classList.remove('menu-open');
                 document.body.classList.remove('menu-open');
             });
         });
