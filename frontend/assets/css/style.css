@@ -515,17 +515,24 @@ h1, h2, h3, h4, h5, h6 {
 
 .project-featured {
     position: absolute;
-    top: 15px;
-    right: 15px;
-    background: #ffd700;
-    color: #2c3e50;
-    padding: 0.25rem 0.75rem;
-    border-radius: 15px;
-    font-size: 0.75rem;
+    bottom: 6px;
+    right: 6px;
+    background: #5b2dbf;
+    color: #ffffff;
+    width: 23px;
+    height: 23px;
+    border-radius: 6px;
+    font-size: 0.5rem;
     font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 6px 14px rgba(26, 12, 61, 0.22);
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    justify-content: center;
+}
+
+.project-featured i {
+    font-size: 0.6rem;
 }
 
 .project-content {

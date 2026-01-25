@@ -62,3 +62,4 @@ frontend/assets/css/login.css
 frontend/assets/js/admin*.js
 auth.js
 
+.vercel

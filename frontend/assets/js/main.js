@@ -259,7 +259,7 @@ class PortfolioApp {
                                   onload="this.classList.add('loaded')">` :
                             '<div class="project-placeholder"><i class="fas fa-code"></i><span>Projeto</span></div>'
                         }
-                        ${project.destaque ? '<div class="project-featured"><i class="fas fa-star"></i> Destaque</div>' : ''}
+                        ${project.destaque ? '<div class="project-featured"><i class="fas fa-star"></i></div>' : ''}
                     </div>
                     <div class="project-content">
                         <h3 class="project-title">${this.escapeHtml(project.titulo)}</h3>
@@ -968,16 +968,18 @@ class PortfolioApp {
     isValidImageUrl(url) {
         if (!url || typeof url !== 'string') return false;
         
-        // Verificar se é uma URL válida
+        const normalizedUrl = url.trim();
+        const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)(\?.*)?$/i;
+        const hasImageHint = imageExtensions.test(normalizedUrl) || normalizedUrl.includes('/uploads/');
+        if (!hasImageHint) return false;
+
+        // Verificar se é uma URL válida (aceita caminhos relativos)
         try {
-            new URL(url);
+            new URL(normalizedUrl, window.location.origin);
+            return true;
         } catch {
             return false;
         }
-        
-        // Verificar extensões de imagem comuns
-        const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)(\?.*)?$/i;
-        return imageExtensions.test(url) || url.includes('/uploads/');
     }
 
     preloadImages() {

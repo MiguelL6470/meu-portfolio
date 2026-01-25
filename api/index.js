@@ -322,14 +322,19 @@ app.post('/api/login', async (req, res) => {
   res.status(404).json({ error: 'Funcionalidade não disponível' });
 });
 
-// API: Logout
+// API: Logout (seguro mesmo sem sessão configurada)
 app.post('/api/logout', (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({ error: 'Erro ao fazer logout' });
-    }
-    res.json({ success: true, message: 'Logout realizado com sucesso' });
-  });
+  if (req.session && typeof req.session.destroy === 'function') {
+    return req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ error: 'Erro ao fazer logout' });
+      }
+      res.json({ success: true, message: 'Logout realizado com sucesso' });
+    });
+  }
+
+  // Em builds serverless não há sessão; apenas responder sucesso
+  res.json({ success: true, message: 'Logout realizado com sucesso' });
 });
 
 // Middleware para registrar visitas (apenas em rotas públicas)
