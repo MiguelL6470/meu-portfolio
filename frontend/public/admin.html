@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Portfólio</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/assets/css/admin.css">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Login Modal (shown when not authenticated) -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="login-container">
+                <h2><i class="fas fa-lock"></i> Acesso Administrativo</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Usuário:</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Senha:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Entrar
+                    </button>
+                </form>
+                
+                <div id="loginError" class="error-message" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" style="display: none;">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="container">
+                <div class="header-content">
+                    <h1><i class="fas fa-tachometer-alt"></i> Painel Administrativo</h1>
+                    <div class="header-actions">
+                        <span class="user-info">Bem-vindo, <span id="userDisplayName">Admin</span></span>
+                        <button id="logoutBtn" class="btn btn-secondary">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <div class="container">
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalProjects">0</h3>
+                            <p>Total de Projetos</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="activeProjects">0</h3>
+                            <p>Projetos Ativos</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="featuredProjects">0</h3>
+                            <p>Projetos em Destaque</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projects Management -->
+                <div class="admin-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-folder-open"></i> Gerenciar Projetos</h2>
+                        <button id="addProjectBtn" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Novo Projeto
+                        </button>
+                    </div>
+                    
+                    <div class="projects-table-container">
+                        <table class="projects-table" id="projectsTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Título</th>
+                                    <th>Tecnologias</th>
+                                    <th>Status</th>
+                                    <th>Destaque</th>
+                                    <th>Criado em</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="projectsTableBody">
+                                <!-- Projetos serão carregados aqui -->
+                            </tbody>
+                        </table>
+                        
+                        <div id="projectsLoading" class="loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Carregando projetos...</p>
+                        </div>
+                        
+                        <div id="noProjects" class="empty-state" style="display: none;">
+                            <i class="fas fa-folder-open"></i>
+                            <h3>Nenhum projeto encontrado</h3>
+                            <p>Comece adicionando seu primeiro projeto</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Project Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="modalTitle">Adicionar Projeto</h3>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            
+            <form id="projectForm">
+                <input type="hidden" id="projectId" name="id">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="titulo">Título *</label>
+                        <input type="text" id="titulo" name="titulo" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="descricao">Descrição *</label>
+                    <textarea id="descricao" name="descricao" rows="4" required></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tecnologias">Tecnologias</label>
+                        <input type="text" id="tecnologias" name="tecnologias" placeholder="ex: React, Node.js, PostgreSQL">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="imagem_url">URL da Imagem</label>
+                        <input type="url" id="imagem_url" name="imagem_url" placeholder="https://exemplo.com/imagem.jpg">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="github_url">GitHub URL</label>
+                        <input type="url" id="github_url" name="github_url" placeholder="https://github.com/usuario/projeto">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="demo_url">Demo URL</label>
+                        <input type="url" id="demo_url" name="demo_url" placeholder="https://projeto-demo.com">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="destaque" name="destaque">
+                            <span class="checkmark"></span>
+                            Projeto em destaque
+                        </label>
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="ativo" name="ativo" checked>
+                            <span class="checkmark"></span>
+                            Projeto ativo
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="cancelBtn" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h3>Confirmar Exclusão</h3>
+                <button class="modal-close" id="closeDeleteModal">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir este projeto?</p>
+                <p><strong id="deleteProjectTitle"></strong></p>
+                <p class="warning">Esta ação não pode ser desfeita.</p>
+            </div>
+            
+            <div class="modal-actions">
+                <button id="cancelDeleteBtn" class="btn btn-secondary">Cancelar</button>
+                <button id="confirmDeleteBtn" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <div class="notification-content">
+            <span id="notificationMessage"></span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/assets/js/admin.js"></script>
+</body>
+</html>

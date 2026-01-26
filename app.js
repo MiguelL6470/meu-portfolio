@@ -3,21 +3,72 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
-const session = require("express-session");
 const path = require("path");
 const multer = require("multer");
-const fs = require("fs").promises;
 const { neon } = require("@neondatabase/serverless");
 const auth = require("./auth");
 
 const app = express();
-const sql = neon(process.env.DATABASE_URL);
+
+const createStubSql = (reason) => {
+  const stub = async () => {
+    console.warn(reason);
+    return [];
+  };
+  stub.isStub = true;
+  stub.query = stub;
+  return stub;
+};
+
+let sql;
+try {
+  if (!process.env.DATABASE_URL) {
+    console.warn("⚠️ DATABASE_URL não configurada.");
+    sql = createStubSql("⚠️ Sem DATABASE_URL configurada");
+  } else {
+    sql = neon(process.env.DATABASE_URL);
+    console.log("✅ Cliente do banco configurado");
+  }
+} catch (err) {
+  console.error("❌ Erro ao criar cliente do banco:", err.message);
+  sql = createStubSql("❌ Falha ao criar cliente do banco");
+}
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+const supabaseBucket = process.env.SUPABASE_BUCKET || "uploads";
+
+let supabaseClient = null;
+const getSupabase = async () => {
+  if (supabaseClient) return supabaseClient;
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Storage Supabase não configurado (SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY)");
+  }
+  const { createClient } = await import("@supabase/supabase-js");
+  supabaseClient = createClient(supabaseUrl, supabaseKey);
+  return supabaseClient;
+};
+
+const storagePathFor = (file) => {
+  const timestamp = Date.now();
+  const randomString = Math.random().toString(36).substring(2, 15);
+  const extension = path.extname(file.originalname);
+  return `uploads/${timestamp}-${randomString}${extension}`;
+};
+
+const publicUrlFor = (filePath) => {
+  if (!filePath) return "";
+  if (filePath.startsWith("http")) return filePath;
+  const normalized = filePath.startsWith("/") ? filePath.slice(1) : filePath;
+  if (!supabaseUrl) return normalized;
+  return `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${normalized}`;
+};
 
 // Middlewares de segurança
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
+      frameSrc: ["'self'", "https://vercel.live"],
       styleSrc: [
         "'self'", 
         "'unsafe-inline'", 
@@ -55,40 +106,11 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Configuração de sessão
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'portfolio-secret-key-change-in-production',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    maxAge: 1000 * 60 * 60 * 24 // 24 horas
-  }
-}));
+// Middleware para anexar usuário autenticado via JWT em cookie
+app.use(auth.attachUser);
 
-// Configuração do multer para upload de imagens
-const uploadDir = path.join(__dirname, 'uploads');
-const ensureUploadDir = async () => {
-  try {
-    await fs.access(uploadDir);
-  } catch {
-    await fs.mkdir(uploadDir, { recursive: true });
-  }
-};
-ensureUploadDir();
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2, 15);
-    const extension = path.extname(file.originalname);
-    cb(null, `${timestamp}-${randomString}${extension}`);
-  }
-});
+// Configuração do multer para upload de imagens (usa memória para enviar ao Supabase)
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml'];
@@ -110,7 +132,7 @@ const upload = multer({
 // Servir arquivos estáticos
 app.use(express.static(path.join(__dirname, 'frontend/public')));
 app.use('/assets', express.static(path.join(__dirname, 'frontend/assets')));
-app.use('/uploads', express.static(uploadDir));
+// Uploads agora são servidos via URLs públicas do Supabase
 
 // ===== ROTAS PÚBLICAS =====
 
@@ -128,7 +150,11 @@ app.get('/api/projetos', async (req, res) => {
       WHERE ativo = true 
       ORDER BY destaque DESC, created_at DESC
     `;
-    res.json(projetos);
+    const projetosComImagem = projetos.map((projeto) => ({
+      ...projeto,
+      imagem_url: publicUrlFor(projeto.imagem_url)
+    }));
+    res.json(projetosComImagem);
   } catch (error) {
     console.error('Erro ao buscar projetos:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -160,8 +186,13 @@ app.post('/api/login', async (req, res) => {
     if (user) {
       // Login bem-sucedido
       auth.recordLoginAttempt(clientIp, true);
-      req.session.userId = user.id;
-      req.session.username = user.username;
+      const token = auth.generateAuthToken(user);
+      res.cookie(auth.TOKEN_NAME, token, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      });
       res.json({ success: true, message: 'Login realizado com sucesso' });
     } else {
       // Login falhou
@@ -182,12 +213,12 @@ app.post('/api/login', async (req, res) => {
 
 // API: Logout
 app.post('/api/logout', (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({ error: 'Erro ao fazer logout' });
-    }
-    res.json({ success: true, message: 'Logout realizado com sucesso' });
+  res.clearCookie(auth.TOKEN_NAME, {
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true
   });
+  res.json({ success: true, message: 'Logout realizado com sucesso' });
 });
 
 // API: Reset de configurações para valores padrão
@@ -230,7 +261,7 @@ app.post('/api/admin/settings/reset', auth.requireAuth, async (req, res) => {
 
 // Página de login admin (sem autenticação)
 app.get('/admin/login', (req, res) => {
-  if (req.session.userId) {
+  if (req.user) {
     return res.redirect('/admin');
   }
   res.sendFile(path.join(__dirname, 'frontend/public/login.html'));
@@ -257,13 +288,19 @@ app.post('/api/admin/projetos', async (req, res) => {
       return res.status(400).json({ error: 'Título e descrição são obrigatórios' });
     }
 
+    const imagemUrlNormalizada = publicUrlFor(imagem_url);
+
     const result = await sql`
       INSERT INTO projetos (titulo, descricao, tecnologias, github_url, demo_url, imagem_url, destaque)
-      VALUES (${titulo}, ${descricao}, ${tecnologias || ''}, ${github_url || ''}, ${demo_url || ''}, ${imagem_url || ''}, ${destaque || false})
+      VALUES (${titulo}, ${descricao}, ${tecnologias || ''}, ${github_url || ''}, ${demo_url || ''}, ${imagemUrlNormalizada || ''}, ${destaque || false})
       RETURNING *
     `;
     
-    res.json(result[0]);
+    const projeto = result[0];
+    res.json({
+      ...projeto,
+      imagem_url: publicUrlFor(projeto.imagem_url)
+    });
   } catch (error) {
     console.error('Erro ao criar projeto:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -275,11 +312,13 @@ app.put('/api/admin/projetos/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { titulo, descricao, tecnologias, github_url, demo_url, imagem_url, destaque, ativo } = req.body;
+
+    const imagemUrlNormalizada = publicUrlFor(imagem_url);
     
     const result = await sql`
       UPDATE projetos 
       SET titulo = ${titulo}, descricao = ${descricao}, tecnologias = ${tecnologias || ''}, 
-          github_url = ${github_url || ''}, demo_url = ${demo_url || ''}, imagem_url = ${imagem_url || ''}, 
+          github_url = ${github_url || ''}, demo_url = ${demo_url || ''}, imagem_url = ${imagemUrlNormalizada || ''}, 
           destaque = ${destaque || false}, ativo = ${ativo !== undefined ? ativo : true},
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ${id}
@@ -290,7 +329,11 @@ app.put('/api/admin/projetos/:id', async (req, res) => {
       return res.status(404).json({ error: 'Projeto não encontrado' });
     }
     
-    res.json(result[0]);
+    const projeto = result[0];
+    res.json({
+      ...projeto,
+      imagem_url: publicUrlFor(projeto.imagem_url)
+    });
   } catch (error) {
     console.error('Erro ao atualizar projeto:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -325,7 +368,11 @@ app.get('/api/admin/projetos', async (req, res) => {
       SELECT * FROM projetos 
       ORDER BY created_at DESC
     `;
-    res.json(projetos);
+    const projetosComImagem = projetos.map((projeto) => ({
+      ...projeto,
+      imagem_url: publicUrlFor(projeto.imagem_url)
+    }));
+    res.json(projetosComImagem);
   } catch (error) {
     console.error('Erro ao buscar projetos:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -341,12 +388,23 @@ app.post('/api/admin/upload', upload.single('image'), async (req, res) => {
       return res.status(400).json({ error: 'Nenhum arquivo foi enviado' });
     }
 
-    const fileUrl = `/uploads/${req.file.filename}`;
+    const supa = await getSupabase();
+    const storagePath = storagePathFor(req.file);
+    const storedFileName = path.basename(storagePath);
+    const { error: uploadError } = await supa.storage
+      .from(supabaseBucket)
+      .upload(storagePath, req.file.buffer, { contentType: req.file.mimetype });
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const fileUrl = publicUrlFor(storagePath);
     
     // Salvar informações do arquivo no banco
     const uploadRecord = await sql`
       INSERT INTO uploads (filename, original_name, file_path, file_size, mime_type, alt_text, uploaded_by)
-      VALUES (${req.file.filename}, ${req.file.originalname}, ${fileUrl}, ${req.file.size}, ${req.file.mimetype}, ${req.body.alt_text || ''}, ${req.session.userId})
+      VALUES (${storedFileName}, ${req.file.originalname}, ${storagePath}, ${req.file.size}, ${req.file.mimetype}, ${req.body.alt_text || ''}, ${req.user?.id || null})
       RETURNING *
     `;
 
@@ -354,7 +412,7 @@ app.post('/api/admin/upload', upload.single('image'), async (req, res) => {
       success: true,
       file: {
         id: uploadRecord[0].id,
-        filename: req.file.filename,
+        filename: storedFileName,
         originalName: req.file.originalname,
         url: fileUrl,
         size: req.file.size,
@@ -364,7 +422,7 @@ app.post('/api/admin/upload', upload.single('image'), async (req, res) => {
     });
   } catch (error) {
     console.error('Erro no upload:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    res.status(500).json({ error: error?.message || 'Erro interno do servidor' });
   }
 });
 
@@ -382,11 +440,15 @@ app.get('/api/admin/uploads', async (req, res) => {
       ORDER BY u.created_at DESC
       LIMIT ${limit} OFFSET ${offset}
     `;
+    const uploadsWithUrl = uploads.map(item => ({
+      ...item,
+      url: publicUrlFor(item.file_path || item.filename)
+    }));
     
     const total = await sql`SELECT COUNT(*) as count FROM uploads`;
     
     res.json({
-      uploads,
+      uploads: uploadsWithUrl,
       pagination: {
         page,
         limit,
@@ -414,12 +476,19 @@ app.delete('/api/admin/uploads/:id', async (req, res) => {
       return res.status(404).json({ error: 'Arquivo não encontrado' });
     }
     
-    // Deletar arquivo físico
-    const filePath = path.join(__dirname, 'uploads', upload[0].filename);
+    // Deletar arquivo no storage
+    const storagePathRaw = upload[0].file_path || upload[0].filename;
+    const storagePath = storagePathRaw?.startsWith('/') ? storagePathRaw.slice(1) : storagePathRaw;
     try {
-      await fs.unlink(filePath);
+      const supa = await getSupabase();
+      if (storagePath) {
+        const { error: removeError } = await supa.storage.from(supabaseBucket).remove([storagePath]);
+        if (removeError) {
+          console.warn('Aviso ao remover do storage:', removeError.message);
+        }
+      }
     } catch (err) {
-      console.warn('Arquivo físico não encontrado:', filePath);
+      console.warn('Storage não configurado ou erro ao remover arquivo:', err.message);
     }
     
     // Deletar registro do banco
@@ -471,7 +540,7 @@ app.put('/api/admin/settings', async (req, res) => {
       // UPSERT (INSERT ou UPDATE)
       await sql`
         INSERT INTO site_settings (setting_key, setting_value, setting_type, updated_at, updated_by)
-        VALUES (${key}, ${settingValue}, ${type}, CURRENT_TIMESTAMP, ${req.session.userId})
+        VALUES (${key}, ${settingValue}, ${type}, CURRENT_TIMESTAMP, ${req.user?.id || null})
         ON CONFLICT (setting_key) 
         DO UPDATE SET 
           setting_value = EXCLUDED.setting_value,

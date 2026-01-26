@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin - Portfólio CMS</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/assets/css/admin-new.css">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Admin Layout -->
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-laptop-code"></i>
+                    <span>Super Admin</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#projects" class="nav-link" data-section="projects">
+                            <i class="fas fa-folder-open"></i>
+                            <span>Projetos</span>
+                            <span class="badge" id="projectsBadge">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#content" class="nav-link" data-section="content">
+                            <i class="fas fa-edit"></i>
+                            <span>Conteúdo</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#media" class="nav-link" data-section="media">
+                            <i class="fas fa-images"></i>
+                            <span>Mídia</span>
+                            <span class="badge" id="mediaBadge">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#messages" class="nav-link" data-section="messages">
+                            <i class="fas fa-envelope"></i>
+                            <span>Mensagens</span>
+                            <span class="badge notification" id="messagesBadge">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#analytics" class="nav-link" data-section="analytics">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#settings" class="nav-link" data-section="settings">
+                            <i class="fas fa-cog"></i>
+                            <span>Configurações</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name" id="userName">Admin</span>
+                        <span class="user-role">Administrador</span>
+                    </div>
+                </div>
+                <button class="logout-btn" id="logoutBtn" title="Sair">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="header-left">
+                    <h1 class="page-title" id="pageTitle">Dashboard</h1>
+                    <div class="breadcrumb" id="breadcrumb">
+                        <span>Home</span>
+                        <i class="fas fa-chevron-right"></i>
+                        <span>Dashboard</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="view-site-btn" id="viewSiteBtn">
+                        <i class="fas fa-external-link-alt"></i>
+                        Ver Site
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Content Sections -->
+            
+            <!-- Dashboard Section -->
+            <section id="section-dashboard" class="content-section active">
+                <div class="dashboard-grid">
+                    <!-- Quick Stats -->
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-icon projects">
+                                <i class="fas fa-folder-open"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalProjectsStat">0</h3>
+                                <p>Total de Projetos</p>
+                                <span class="stat-change positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                    +12% este mês
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon visits">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalVisitsStat">0</h3>
+                                <p>Visitas este mês</p>
+                                <span class="stat-change positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                    +25% vs mês anterior
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon messages">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalMessagesStat">0</h3>
+                                <p>Mensagens</p>
+                                <span class="stat-change" id="unreadMessages">
+                                    <i class="fas fa-circle"></i>
+                                    0 não lidas
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon uploads">
+                                <i class="fas fa-images"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalUploadsStat">0</h3>
+                                <p>Arquivos de Mídia</p>
+                                <span class="stat-change">
+                                    <i class="fas fa-hdd"></i>
+                                    <span id="storageUsed">0 MB</span> usados
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts Row -->
+                    <div class="charts-container">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3>Visitas dos Últimos 7 Dias</h3>
+                                <div class="chart-actions">
+                                    <button class="btn btn-sm" data-action="refresh-chart" data-chart="visits">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <canvas id="visitsChart" width="400" height="200"></canvas>
+                        </div>
+                        
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3>Dispositivos Mais Usados</h3>
+                            </div>
+                            <canvas id="devicesChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Activity -->
+                    <div class="activity-container">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Atividade Recente</h3>
+                                <button class="btn btn-sm" data-action="refresh-activity">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                            <div class="activity-list" id="activityList">
+                                <!-- Activity items will be loaded here -->
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Mensagens Recentes</h3>
+                                <a href="#messages" class="view-all-link" data-action="switch-section" data-section="messages">
+                                    Ver todas
+                                </a>
+                            </div>
+                            <div class="messages-preview" id="messagesPreview">
+                                <!-- Recent messages will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Projects Section -->
+            <section id="section-projects" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Gerenciar Projetos</h2>
+                        <p>Adicione, edite e gerencie seus projetos do portfólio</p>
+                    </div>
+                    <div class="section-actions">
+                        <button class="btn btn-secondary" data-action="export-projects">
+                            <i class="fas fa-download"></i>
+                            Exportar
+                        </button>
+                        <button class="btn btn-primary" id="addProjectBtn">
+                            <i class="fas fa-plus"></i>
+                            Novo Projeto
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <div class="table-filters">
+                        <div class="filter-group">
+                            <input type="text" placeholder="Buscar projetos..." id="projectsSearch">
+                            <select id="projectsFilter">
+                                <option value="all">Todos os projetos</option>
+                                <option value="active">Apenas ativos</option>
+                                <option value="inactive">Apenas inativos</option>
+                                <option value="featured">Em destaque</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="data-table-wrapper">
+                        <table class="data-table" id="projectsTable">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="selectAllProjects"></th>
+                                    <th>Projeto</th>
+                                    <th>Tecnologias</th>
+                                    <th>Status</th>
+                                    <th>Criado</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="projectsTableBody">
+                                <!-- Projects will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="table-pagination" id="projectsPagination">
+                        <!-- Pagination will be loaded here -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Content Editor Section -->
+            <section id="section-content" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Editor de Conteúdo</h2>
+                        <p>Edite todos os textos e conteúdos do seu site</p>
+                    </div>
+                    <div class="section-actions">
+                        <button class="btn btn-secondary" data-action="preview-site">
+                            <i class="fas fa-eye"></i>
+                            Preview
+                        </button>
+                        <button class="btn btn-primary" data-action="save-all-content">
+                            <i class="fas fa-save"></i>
+                            Salvar Tudo
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="content-editor-grid">
+                    <div class="editor-sidebar">
+                        <h3>Seções do Site</h3>
+                        <ul class="section-list">
+                            <li class="section-item active" data-section="hero">
+                                <i class="fas fa-home"></i>
+                                Hero/Início
+                            </li>
+                            <li class="section-item" data-section="about">
+                                <i class="fas fa-user"></i>
+                                Sobre Mim
+                            </li>
+                            <li class="section-item" data-section="contact">
+                                <i class="fas fa-envelope"></i>
+                                Contato
+                            </li>
+                            <li class="section-item" data-section="footer">
+                                <i class="fas fa-footer"></i>
+                                Rodapé
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="editor-main">
+                        <div id="content-hero" class="content-editor active">
+                            <h3>Seção Hero/Início</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="hero-title">Título Principal</label>
+                                    <input type="text" id="hero-title" class="form-input">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="hero-subtitle">Subtítulo</label>
+                                    <textarea id="hero-subtitle" class="form-textarea" rows="3"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="hero-cta-primary">Botão Primário</label>
+                                    <input type="text" id="hero-cta-primary" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label for="hero-cta-secondary">Botão Secundário</label>
+                                    <input type="text" id="hero-cta-secondary" class="form-input">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="content-about" class="content-editor">
+                            <h3>Seção Sobre Mim</h3>
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="about-title">Título da Seção</label>
+                                    <input type="text" id="about-title" class="form-input">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="about-paragraph1">Primeiro Parágrafo</label>
+                                    <textarea id="about-paragraph1" class="form-textarea" rows="4"></textarea>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="about-paragraph2">Segundo Parágrafo</label>
+                                    <textarea id="about-paragraph2" class="form-textarea" rows="4"></textarea>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="about-skills">Habilidades (separadas por vírgula)</label>
+                                    <input type="text" id="about-skills" class="form-input" placeholder="JavaScript, Node.js, React...">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="content-contact" class="content-editor">
+                            <h3>Seção Contato</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="contact-title">Título da Seção</label>
+                                    <input type="text" id="contact-title" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label for="contact-subtitle">Subtítulo</label>
+                                    <input type="text" id="contact-subtitle" class="form-input">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="contact-description">Descrição</label>
+                                    <textarea id="contact-description" class="form-textarea" rows="4"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="content-footer" class="content-editor">
+                            <h3>Rodapé</h3>
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="footer-copyright">Texto de Copyright</label>
+                                    <input type="text" id="footer-copyright" class="form-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Media Section -->
+            <section id="section-media" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Gerenciador de Mídia</h2>
+                        <p>Faça upload e gerencie suas imagens e arquivos</p>
+                    </div>
+                    <div class="section-actions">
+                        <button class="btn btn-secondary" data-action="bulk-delete">
+                            <i class="fas fa-trash"></i>
+                            Excluir Selecionados
+                        </button>
+                        <button class="btn btn-primary" id="uploadMediaBtn">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            Upload de Arquivos
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Upload Dropzone -->
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-content">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <h3>Arraste arquivos aqui ou clique para fazer upload</h3>
+                        <p>Suporte para JPG, PNG, WebP, SVG (máx. 10MB cada)</p>
+                        <input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
+                        <button class="btn btn-primary" data-action="trigger-file-input">
+                            Selecionar Arquivos
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Media Grid -->
+                <div class="media-filters">
+                    <div class="filter-group">
+                        <input type="text" placeholder="Buscar arquivos..." id="mediaSearch">
+                        <select id="mediaTypeFilter">
+                            <option value="all">Todos os tipos</option>
+                            <option value="image/jpeg">JPEG</option>
+                            <option value="image/png">PNG</option>
+                            <option value="image/webp">WebP</option>
+                            <option value="image/svg+xml">SVG</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="media-grid" id="mediaGrid">
+                    <!-- Media items will be loaded here -->
+                </div>
+                
+                <div class="media-pagination" id="mediaPagination">
+                    <!-- Pagination will be loaded here -->
+                </div>
+            </section>
+            
+            <!-- Messages Section -->
+            <section id="section-messages" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Mensagens de Contato</h2>
+                        <p>Gerencie as mensagens recebidas através do formulário</p>
+                    </div>
+                    <div class="section-actions">
+                        <button class="btn btn-secondary" data-action="mark-all-read">
+                            <i class="fas fa-check-double"></i>
+                            Marcar Todas como Lidas
+                        </button>
+                        <button class="btn btn-danger" data-action="delete-selected">
+                            <i class="fas fa-trash"></i>
+                            Excluir Selecionadas
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="messages-container">
+                    <div class="messages-filters">
+                        <div class="filter-group">
+                            <input type="text" placeholder="Buscar mensagens..." id="messagesSearch">
+                            <select id="messagesStatusFilter">
+                                <option value="all">Todas as mensagens</option>
+                                <option value="unread">Não lidas</option>
+                                <option value="read">Lidas</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="messages-list" id="messagesList">
+                        <!-- Messages will be loaded here -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Analytics Section -->
+            <section id="section-analytics" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Analytics & Estatísticas</h2>
+                        <p>Monitore o desempenho e visitantes do seu site</p>
+                    </div>
+                    <div class="section-actions">
+                        <button class="btn btn-secondary" data-action="export-analytics">
+                            <i class="fas fa-download"></i>
+                            Exportar Dados
+                        </button>
+                        <button class="btn btn-primary" data-action="refresh-analytics">
+                            <i class="fas fa-sync-alt"></i>
+                            Atualizar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="analytics-grid">
+                    <div class="analytics-summary">
+                        <div class="summary-card">
+                            <h4>Hoje</h4>
+                            <div class="summary-value" id="analyticsToday">0</div>
+                            <div class="summary-label">visitantes</div>
+                        </div>
+                        <div class="summary-card">
+                            <h4>Esta Semana</h4>
+                            <div class="summary-value" id="analyticsWeek">0</div>
+                            <div class="summary-label">visitantes</div>
+                        </div>
+                        <div class="summary-card">
+                            <h4>Este Mês</h4>
+                            <div class="summary-value" id="analyticsMonth">0</div>
+                            <div class="summary-label">visitantes</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="analyticsChart" width="800" height="400"></canvas>
+                    </div>
+                    
+                    <div class="analytics-details">
+                        <div class="details-card">
+                            <h4>Páginas Mais Visitadas</h4>
+                            <div id="popularPages"></div>
+                        </div>
+                        <div class="details-card">
+                            <h4>Dispositivos</h4>
+                            <canvas id="devicesDetailChart" width="300" height="300"></canvas>
+                        </div>
+                        <div class="details-card">
+                            <h4>Navegadores</h4>
+                            <div id="browserStats"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Settings Section -->
+            <section id="section-settings" class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Configurações do Site</h2>
+                        <p>Configure aspectos gerais e preferências do seu portfólio</p>
+                    </div>
+                    <div class="section-actions">
+                        <button class="btn btn-danger" data-action="reset-settings">
+                            <i class="fas fa-undo"></i>
+                            Restaurar Padrões
+                        </button>
+                        <button class="btn btn-primary" data-action="save-settings">
+                            <i class="fas fa-save"></i>
+                            Salvar Configurações
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="settings-tabs">
+                    <div class="tab-nav">
+                        <button class="tab-btn active" data-tab="general">
+                            <i class="fas fa-cog"></i>
+                            Geral
+                        </button>
+                        <button class="tab-btn" data-tab="appearance">
+                            <i class="fas fa-palette"></i>
+                            Aparência
+                        </button>
+                        <button class="tab-btn" data-tab="seo">
+                            <i class="fas fa-search"></i>
+                            SEO
+                        </button>
+                        <button class="tab-btn" data-tab="social">
+                            <i class="fas fa-share-alt"></i>
+                            Redes Sociais
+                        </button>
+                    </div>
+                    
+                    <div class="tab-content">
+                        <div id="settings-general" class="tab-panel active">
+                            <div class="settings-grid">
+                                <div class="form-group">
+                                    <label for="site-title">Título do Site</label>
+                                    <input type="text" id="site-title" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label for="main-email">Email Principal</label>
+                                    <input type="email" id="main-email" class="form-input">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="site-description">Descrição do Site</label>
+                                    <textarea id="site-description" class="form-textarea" rows="3"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="maintenance-mode">
+                                        Modo Manutenção
+                                    </label>
+                                    <small>Quando ativo, apenas admins podem acessar o site</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="analytics-enabled">
+                                        Analytics Habilitado
+                                    </label>
+                                    <small>Coleta dados de visitantes para estatísticas</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="settings-appearance" class="tab-panel">
+                            <div class="settings-grid">
+                                <div class="form-group">
+                                    <label for="primary-color">Cor Primária</label>
+                                    <input type="color" id="primary-color" class="color-picker">
+                                </div>
+                                <div class="form-group">
+                                    <label for="secondary-color">Cor Secundária</label>
+                                    <input type="color" id="secondary-color" class="color-picker">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="settings-seo" class="tab-panel">
+                            <div class="settings-grid">
+                                <div class="form-group full-width">
+                                    <label for="meta-description">Meta Description</label>
+                                    <textarea id="meta-description" class="form-textarea" rows="3"></textarea>
+                                    <small>Descrição que aparece nos resultados do Google</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="settings-social" class="tab-panel">
+                            <div class="settings-grid">
+                                <div class="form-group">
+                                    <label for="github-url">GitHub URL</label>
+                                    <input type="url" id="github-url" class="form-input" placeholder="https://github.com/seu-usuario">
+                                </div>
+                                <div class="form-group">
+                                    <label for="linkedin-url">LinkedIn URL</label>
+                                    <input type="url" id="linkedin-url" class="form-input" placeholder="https://linkedin.com/in/seu-perfil">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- Modals -->
+    
+    <!-- Project Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="projectModalTitle">Novo Projeto</h3>
+                    <button class="modal-close" data-action="close-modal" data-modal="projectModal">&times;</button>
+                </div>
+                <form id="projectForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="projectId">
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="project-title">Título *</label>
+                                <input type="text" id="project-title" class="form-input" required>
+                            </div>
+                            <div class="form-group full-width tech-group">
+                                <div class="tech-header">
+                                    <label for="project-technologies">Tecnologias</label>
+                                    <button type="button" class="icon-btn" id="addCustomTechBtn" title="Adicionar tecnologia personalizada">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                <input type="hidden" id="project-technologies" value="">
+                                <div class="tech-select" id="technologyChips" aria-label="Tecnologias do projeto"></div>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="project-description">Descrição *</label>
+                                <textarea id="project-description" class="form-textarea" rows="4" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="project-github">GitHub URL</label>
+                                <input type="url" id="project-github" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="project-demo">Demo URL</label>
+                                <input type="url" id="project-demo" class="form-input">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="project-image">Imagem do Projeto</label>
+                                <div class="image-upload-area" id="imageUploadArea">
+                                    <div class="upload-placeholder">
+                                        <i class="fas fa-image"></i>
+                                        <p>Clique para selecionar ou arraste uma imagem</p>
+                                    </div>
+                                    <input type="file" id="project-image" accept="image/*" style="display: none;">
+                                </div>
+                                <div class="image-preview" id="imagePreview" style="display: none;">
+                                    <img id="previewImg" src="" alt="Preview">
+                                    <button type="button" class="remove-image" onclick="removeImage()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="project-featured">
+                                    Projeto em destaque
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="project-active" checked>
+                                    Projeto ativo
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-action="close-modal" data-modal="projectModal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            Salvar Projeto
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Confirmar Exclusão</h3>
+                    <button class="modal-close" data-action="close-modal" data-modal="deleteModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="delete-confirmation">
+                        <i class="fas fa-exclamation-triangle warning-icon"></i>
+                        <h4>Tem certeza?</h4>
+                        <p id="deleteMessage">Esta ação não pode ser desfeita.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-action="close-modal" data-modal="deleteModal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash"></i>
+                        Excluir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Carregando...</p>
+        </div>
+    </div>
+    
+    <!-- Notification Toast -->
+    <div id="toast" class="toast">
+        <div class="toast-content">
+            <div class="toast-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="toast-message" id="toastMessage"></div>
+            <button class="toast-close" data-action="hide-toast">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/assets/js/admin-new.js"></script>
+</body>
+</html>

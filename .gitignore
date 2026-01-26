@@ -54,12 +54,4 @@ temp/
 CLAUDE.md
 NOTES.md
 
-# Arquivos do painel administrativo (não devem ser públicos)
-frontend/public/admin*.html
-frontend/public/login.html
-frontend/assets/css/admin*.css
-frontend/assets/css/login.css
-frontend/assets/js/admin*.js
-auth.js
-
 .vercel

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin - Portfólio</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/assets/css/login.css">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="login-page">
+        <div class="login-container">
+            <!-- Background Pattern -->
+            <div class="background-pattern"></div>
+            
+            <!-- Login Card -->
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="logo">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h1>Acesso Administrativo</h1>
+                    <p>Faça login para gerenciar seu portfólio</p>
+                </div>
+                
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <div class="input-container">
+                            <i class="fas fa-user input-icon"></i>
+                            <input type="text" id="username" name="username" placeholder="Nome de usuário" autocomplete="username" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="input-container">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" id="password" name="password" placeholder="Senha" autocomplete="current-password" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword()">
+                                <i class="fas fa-eye" id="passwordToggleIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="login-btn">
+                        <span class="btn-text">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Entrar
+                        </span>
+                        <div class="btn-loading" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Entrando...
+                        </div>
+                    </button>
+                </form>
+                
+                <div id="loginError" class="error-message" style="display: none;"></div>
+                <div id="rateLimitWarning" class="warning-message" style="display: none;"></div>
+                
+                <div class="login-footer">
+                    <a href="/" class="back-to-site">
+                        <i class="fas fa-arrow-left"></i>
+                        Voltar ao site
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        class LoginApp {
+            constructor() {
+                this.setupEventListeners();
+                this.addKeyboardShortcuts();
+            }
+
+            setupEventListeners() {
+                const form = document.getElementById('loginForm');
+                if (form) {
+                    form.addEventListener('submit', (e) => this.handleLogin(e));
+                }
+
+                // Focus no primeiro campo
+                document.getElementById('username').focus();
+            }
+
+            addKeyboardShortcuts() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        window.location.href = '/';
+                    }
+                });
+            }
+
+            async handleLogin(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(e.target);
+                const errorDiv = document.getElementById('loginError');
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const btnText = submitBtn.querySelector('.btn-text');
+                const btnLoading = submitBtn.querySelector('.btn-loading');
+                
+                // Clear previous errors
+                errorDiv.style.display = 'none';
+                errorDiv.className = 'error-message';
+                
+                // Show loading state
+                submitBtn.disabled = true;
+                btnText.style.display = 'none';
+                btnLoading.style.display = 'flex';
+                
+                try {
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            username: formData.get('username'),
+                            password: formData.get('password')
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        // Login successful - show success and redirect
+                        this.showSuccess('Login realizado com sucesso!');
+                        setTimeout(() => {
+                            window.location.href = '/admin';
+                        }, 1000);
+                    } else {
+                        // Login failed
+                        if (result.blocked) {
+                            // IP is blocked
+                            this.showBlocked(result.error, result.remainingTime);
+                            this.disableFormForTime(result.remainingTime);
+                        } else {
+                            // Show error with remaining attempts info
+                            let errorMessage = result.error || 'Credenciais inválidas';
+                            if (result.remainingAttempts !== undefined) {
+                                this.showRemainingAttempts(result.remainingAttempts);
+                            }
+                            if (result.warning) {
+                                this.showWarning(result.warning);
+                            }
+                            this.showError(errorMessage);
+                        }
+                    }
+                    
+                } catch (error) {
+                    console.error('Erro no login:', error);
+                    this.showError('Erro de conexão. Verifique sua internet e tente novamente.');
+                } finally {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        btnText.style.display = 'flex';
+                        btnLoading.style.display = 'none';
+                    }
+                }
+            }
+
+            showError(message) {
+                const errorDiv = document.getElementById('loginError');
+                errorDiv.textContent = message;
+                errorDiv.className = 'error-message show';
+                errorDiv.style.display = 'block';
+                
+                // Shake animation
+                const loginCard = document.querySelector('.login-card');
+                loginCard.classList.add('shake');
+                setTimeout(() => loginCard.classList.remove('shake'), 600);
+            }
+
+            showSuccess(message) {
+                const errorDiv = document.getElementById('loginError');
+                errorDiv.textContent = message;
+                errorDiv.className = 'success-message show';
+                errorDiv.style.display = 'block';
+            }
+
+            showBlocked(message, remainingMinutes) {
+                const errorDiv = document.getElementById('loginError');
+                const hours = Math.floor(remainingMinutes / 60);
+                const minutes = remainingMinutes % 60;
+                
+                let timeText = '';
+                if (hours > 0) {
+                    timeText = `${hours} hora(s) e ${minutes} minuto(s)`;
+                } else {
+                    timeText = `${minutes} minuto(s)`;
+                }
+                
+                errorDiv.innerHTML = `
+                    <i class="fas fa-clock"></i>
+                    <strong>Acesso Bloqueado</strong><br>
+                    Muitas tentativas de login incorretas.<br>
+                    Tente novamente em ${timeText}.
+                `;
+                errorDiv.className = 'error-message blocked show';
+                errorDiv.style.display = 'block';
+            }
+
+            showWarning(message) {
+                const warningDiv = document.getElementById('rateLimitWarning');
+                warningDiv.innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    ${message}
+                `;
+                warningDiv.className = 'warning-message show';
+                warningDiv.style.display = 'block';
+                
+                setTimeout(() => {
+                    warningDiv.classList.remove('show');
+                    setTimeout(() => warningDiv.style.display = 'none', 300);
+                }, 5000);
+            }
+
+            showRemainingAttempts(remaining) {
+                const warningDiv = document.getElementById('rateLimitWarning');
+                const pluralText = remaining === 1 ? 'tentativa' : 'tentativas';
+                
+                warningDiv.innerHTML = `
+                    <i class="fas fa-info-circle"></i>
+                    Restam ${remaining} ${pluralText} antes do bloqueio.
+                `;
+                warningDiv.className = `warning-message show ${remaining <= 1 ? 'critical' : ''}`;
+                warningDiv.style.display = 'block';
+                
+                if (remaining > 1) {
+                    setTimeout(() => {
+                        warningDiv.classList.remove('show');
+                        setTimeout(() => warningDiv.style.display = 'none', 300);
+                    }, 4000);
+                }
+            }
+
+            disableFormForTime(minutes) {
+                const form = document.getElementById('loginForm');
+                const inputs = form.querySelectorAll('input, button');
+                
+                inputs.forEach(input => input.disabled = true);
+                
+                // Optional: Show countdown
+                this.startCountdown(minutes);
+            }
+
+            startCountdown(totalMinutes) {
+                const errorDiv = document.getElementById('loginError');
+                let remainingSeconds = totalMinutes * 60;
+                
+                const updateCountdown = () => {
+                    if (remainingSeconds <= 0) {
+                        location.reload(); // Reload page when time is up
+                        return;
+                    }
+                    
+                    const hours = Math.floor(remainingSeconds / 3600);
+                    const minutes = Math.floor((remainingSeconds % 3600) / 60);
+                    const seconds = remainingSeconds % 60;
+                    
+                    let timeText = '';
+                    if (hours > 0) {
+                        timeText = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    } else {
+                        timeText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                    
+                    errorDiv.innerHTML = `
+                        <i class="fas fa-clock"></i>
+                        <strong>Acesso Bloqueado</strong><br>
+                        Tempo restante: ${timeText}
+                    `;
+                    
+                    remainingSeconds--;
+                    setTimeout(updateCountdown, 1000);
+                };
+                
+                updateCountdown();
+            }
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('passwordToggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        // Initialize login app
+        document.addEventListener('DOMContentLoaded', () => {
+            new LoginApp();
+        });
+
+        // Add error handling
+        window.addEventListener('error', (e) => {
+            console.error('Erro não capturado:', e.error);
+        });
+    </script>
+</body>
+</html>
