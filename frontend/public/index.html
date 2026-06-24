@@ -817,7 +817,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .projects-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
 }
 
@@ -1090,7 +1090,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .project-links {
     display: flex;
-    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
 }
 
 .project-link {
@@ -1115,9 +1118,75 @@ h1, h2, h3, h4, h5, h6 {
     color: white;
 }
 
-.project-link:hover {
+.project-link.closed-source {
+    background: transparent;
+    color: var(--text-secondary, #6b7280);
+    border: 1px dashed var(--border-color, #d1d5db);
+    cursor: default;
+}
+
+.project-link.closed-source i {
+    color: var(--text-secondary, #6b7280);
+}
+
+.project-link:not(.closed-source):hover {
     transform: translateY(-2px);
     opacity: 0.9;
+}
+
+/* Botão de expandir descrição */
+.project-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding: 0;
+    background: none;
+    border: none;
+    color: #667eea;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 2;
+    transition: color 0.3s ease;
+}
+
+.project-toggle:hover {
+    color: #5567d8;
+}
+
+.project-toggle i {
+    transition: transform 0.3s ease;
+    font-size: 0.75rem;
+}
+
+.project-card.expanded .project-toggle i {
+    transform: rotate(180deg);
+}
+
+.project-details {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease;
+}
+
+.project-card.expanded .project-details {
+    max-height: 600px;
+    opacity: 1;
+    margin-top: 0.75rem;
+}
+
+.project-toggle .toggle-text-less {
+    display: none;
+}
+
+.project-card.expanded .project-toggle .toggle-text-more {
+    display: none;
+}
+
+.project-card.expanded .project-toggle .toggle-text-less {
+    display: inline;
 }
 
 /* Modern Contact Section */
@@ -3358,7 +3427,7 @@ h1, h2, h3, h4, h5, h6 {
                 </p>
                 <div class="hero-stats">
                     <div class="stat-item">
-                        <span class="stat-number">2+</span>
+                        <span class="stat-number">3+</span>
                         <span class="stat-label">Anos de Experiência</span>
                     </div>
                     <div class="stat-item">

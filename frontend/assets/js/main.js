@@ -263,7 +263,6 @@ class PortfolioApp {
                     </div>
                     <div class="project-content">
                         <h3 class="project-title">${this.escapeHtml(project.titulo)}</h3>
-                        <p class="project-description">${this.escapeHtml(project.descricao)}</p>
                         ${technologies.length > 0 ? `
                             <div class="project-technologies">
                                 <div class="project-tech-tags">
@@ -271,7 +270,18 @@ class PortfolioApp {
                                 </div>
                             </div>
                         ` : ''}
-                        ${linksHTML ? `<div class="project-links">${linksHTML}</div>` : ''}
+                        ${project.descricao ? `
+                            <button class="project-toggle" type="button"
+                                    onclick="this.closest('.project-card').classList.toggle('expanded')">
+                                <span class="toggle-text-more">Ver detalhes</span>
+                                <span class="toggle-text-less">Ocultar detalhes</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        ` : ''}
+                        <div class="project-details">
+                            ${project.descricao ? `<p class="project-description">${this.escapeHtml(project.descricao)}</p>` : ''}
+                            ${linksHTML ? `<div class="project-links">${linksHTML}</div>` : ''}
+                        </div>
                     </div>
                 </div>
             `;
@@ -304,8 +314,9 @@ class PortfolioApp {
 
     generateProjectLinks(project) {
         const links = [];
-        
-        if (project.github_url) {
+        const hasGithub = !!project.github_url;
+
+        if (hasGithub) {
             links.push(`
                 <a href="${project.github_url}" target="_blank" rel="noopener noreferrer" class="project-link github">
                     <i class="fab fa-github"></i>
@@ -313,16 +324,29 @@ class PortfolioApp {
                 </a>
             `);
         }
-        
+
         if (project.demo_url) {
+            // Sem repositório público: trata-se de uma plataforma proprietária/SaaS,
+            // então mudamos o rótulo e sinalizamos que o código não é aberto.
+            const demoLabel = hasGithub ? 'Demo' : 'Acessar plataforma';
             links.push(`
                 <a href="${project.demo_url}" target="_blank" rel="noopener noreferrer" class="project-link demo">
                     <i class="fas fa-external-link-alt"></i>
-                    Demo
+                    ${demoLabel}
                 </a>
             `);
         }
-        
+
+        // Selo de código fechado quando não há repositório público.
+        if (!hasGithub) {
+            links.push(`
+                <span class="project-link closed-source" title="Projeto proprietário — código-fonte não público">
+                    <i class="fas fa-lock"></i>
+                    Código privado
+                </span>
+            `);
+        }
+
         return links.join('');
     }
 

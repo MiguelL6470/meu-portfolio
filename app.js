@@ -6,6 +6,7 @@ const helmet = require("helmet");
 const path = require("path");
 const multer = require("multer");
 const { neon } = require("@neondatabase/serverless");
+const { put } = require("@vercel/blob");
 const auth = require("./auth");
 
 const app = express();
@@ -33,20 +34,8 @@ try {
   console.error("❌ Erro ao criar cliente do banco:", err.message);
   sql = createStubSql("❌ Falha ao criar cliente do banco");
 }
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
-const supabaseBucket = process.env.SUPABASE_BUCKET || "uploads";
-
-let supabaseClient = null;
-const getSupabase = async () => {
-  if (supabaseClient) return supabaseClient;
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error("Storage Supabase não configurado (SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY)");
-  }
-  const { createClient } = await import("@supabase/supabase-js");
-  supabaseClient = createClient(supabaseUrl, supabaseKey);
-  return supabaseClient;
-};
+// Storage: Vercel Blob (BLOB_READ_WRITE_TOKEN é lido automaticamente do ambiente)
+const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
 
 const storagePathFor = (file) => {
   const timestamp = Date.now();
@@ -57,10 +46,9 @@ const storagePathFor = (file) => {
 
 const publicUrlFor = (filePath) => {
   if (!filePath) return "";
+  // Uploads via Vercel Blob já armazenam a URL pública completa.
   if (filePath.startsWith("http")) return filePath;
-  const normalized = filePath.startsWith("/") ? filePath.slice(1) : filePath;
-  if (!supabaseUrl) return normalized;
-  return `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${normalized}`;
+  return filePath.startsWith("/") ? filePath.slice(1) : filePath;
 };
 
 // Middlewares de segurança
@@ -388,23 +376,24 @@ app.post('/api/admin/upload', upload.single('image'), async (req, res) => {
       return res.status(400).json({ error: 'Nenhum arquivo foi enviado' });
     }
 
-    const supa = await getSupabase();
-    const storagePath = storagePathFor(req.file);
-    const storedFileName = path.basename(storagePath);
-    const { error: uploadError } = await supa.storage
-      .from(supabaseBucket)
-      .upload(storagePath, req.file.buffer, { contentType: req.file.mimetype });
-
-    if (uploadError) {
-      throw uploadError;
+    if (!blobToken) {
+      throw new Error("Storage não configurado: defina BLOB_READ_WRITE_TOKEN (Vercel Blob)");
     }
 
-    const fileUrl = publicUrlFor(storagePath);
-    
-    // Salvar informações do arquivo no banco
+    const storagePath = storagePathFor(req.file);
+    const storedFileName = path.basename(storagePath);
+    const blob = await put(storagePath, req.file.buffer, {
+      access: "public",
+      contentType: req.file.mimetype,
+      token: blobToken,
+    });
+
+    const fileUrl = blob.url; // URL pública completa do Vercel Blob
+
+    // Salvar informações do arquivo no banco (file_path = URL pública completa)
     const uploadRecord = await sql`
       INSERT INTO uploads (filename, original_name, file_path, file_size, mime_type, alt_text, uploaded_by)
-      VALUES (${storedFileName}, ${req.file.originalname}, ${storagePath}, ${req.file.size}, ${req.file.mimetype}, ${req.body.alt_text || ''}, ${req.user?.id || null})
+      VALUES (${storedFileName}, ${req.file.originalname}, ${fileUrl}, ${req.file.size}, ${req.file.mimetype}, ${req.body.alt_text || ''}, ${req.user?.id || null})
       RETURNING *
     `;
 
@@ -476,19 +465,15 @@ app.delete('/api/admin/uploads/:id', async (req, res) => {
       return res.status(404).json({ error: 'Arquivo não encontrado' });
     }
     
-    // Deletar arquivo no storage
-    const storagePathRaw = upload[0].file_path || upload[0].filename;
-    const storagePath = storagePathRaw?.startsWith('/') ? storagePathRaw.slice(1) : storagePathRaw;
+    // Deletar arquivo no storage (Vercel Blob)
+    const storedUrl = upload[0].file_path || upload[0].filename;
     try {
-      const supa = await getSupabase();
-      if (storagePath) {
-        const { error: removeError } = await supa.storage.from(supabaseBucket).remove([storagePath]);
-        if (removeError) {
-          console.warn('Aviso ao remover do storage:', removeError.message);
-        }
+      if (storedUrl && storedUrl.startsWith('http') && blobToken) {
+        const { del } = require("@vercel/blob");
+        await del(storedUrl, { token: blobToken });
       }
     } catch (err) {
-      console.warn('Storage não configurado ou erro ao remover arquivo:', err.message);
+      console.warn('Erro ao remover arquivo do Blob:', err.message);
     }
     
     // Deletar registro do banco
